@@ -21,6 +21,10 @@ Device (CREC)
 #ifdef EC_ENABLE_WAKE_PIN
 	Name (_PRW, Package () { EC_ENABLE_WAKE_PIN, 0x5 })
 #endif
+	Method (_STA, 0, NotSerialized)
+        {
+            Return (0xB)  /* return 0xB to hide device from Windows */
+        }
 
 #ifdef EC_ENABLE_MKBP_DEVICE
 	Device (CKSC)
