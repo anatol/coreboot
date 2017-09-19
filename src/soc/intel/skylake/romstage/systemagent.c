@@ -18,6 +18,7 @@
 #include <device/device.h>
 #include <intelblocks/systemagent.h>
 #include <soc/iomap.h>
+#include <soc/pci_devs.h>
 #include <soc/romstage.h>
 #include <soc/systemagent.h>
 
@@ -34,12 +35,19 @@ void systemagent_early_init(void)
 		{ EDRAMBAR, EDRAM_BASE_ADDRESS, EDRAM_BASE_SIZE, "EDRAMBAR" },
 	};
 
-	/* Set Fixed MMIO address into PCI configuration space */
+	const bool vtd_capable =
+		!(pci_read_config32(SA_DEV_ROOT, CAPID0_A) & VTD_DISABLE);
+
+	/* Set Fixed MMIO addresss into PCI configuration space */
 	sa_set_pci_bar(soc_fixed_pci_resources,
 			ARRAY_SIZE(soc_fixed_pci_resources));
 	/* Set Fixed MMIO address into MCH base address */
 	sa_set_mch_bar(soc_fixed_mch_resources,
 			ARRAY_SIZE(soc_fixed_mch_resources));
-	/* Enable PAM registers */
+	if (vtd_capable)
+		sa_set_mch_bar(soc_vtd_resources,
+				ARRAY_SIZE(soc_vtd_resources));
+
+	/* Enable PAM regisers */
 	enable_pam_region();
 }

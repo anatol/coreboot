@@ -30,9 +30,11 @@
 #include <soc/acpi.h>
 #include <soc/intel/common/vbt.h>
 #include <soc/interrupt.h>
+#include <soc/iomap.h>
 #include <soc/irq.h>
 #include <soc/pci_devs.h>
 #include <soc/ramstage.h>
+#include <soc/systemagent.h>
 #include <string.h>
 
 void soc_init_pre_device(void *chip_info)
@@ -320,6 +322,14 @@ void platform_fsp_silicon_init_params_cb(FSPS_UPD *supd)
 
 	/* Set TccActivationOffset */
 	tconfig->TccActivationOffset = config->tcc_offset;
+
+	/* Enable VT-d and X2APIC */
+	if (soc_is_vtd_capable()) {
+		params->VtdBaseAddress[0] = GFXVT_BASE_ADDRESS;
+		params->VtdBaseAddress[1] = VTVC0_BASE_ADDRESS;
+		params->X2ApicOptOut = 0;
+		tconfig->VtdDisable = 0;
+	}
 
 	soc_irq_settings(params);
 }
